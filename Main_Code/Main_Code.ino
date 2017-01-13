@@ -154,6 +154,11 @@ int tempo[] = {
 #define EARTHLEDFLASHER 13
 #define ALARMSOUNDER 5 
 #define OPENLEDFLASHER 9
+#define LANELEDLEFT1 12
+#define LANELEDLEFT2 11
+#define LANELEDRIGHT1 10
+#define LANELEDRIGHT2 8
+
 
 #include <Servo.h>
 Servo Motor; 
@@ -166,7 +171,7 @@ unsigned long previousMillis3 = 0;
 const long interval = 500;            
 const int buttonPin = 2;     // the number of the pushbutton pin
 int mode=0;
-
+boolean flagio=false;
 // variables will change:
 int buttonState = 0;         // variable for reading the pushbutton status
 
@@ -177,19 +182,34 @@ void setup() {
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
   pinMode(OPENLEDFLASHER, OUTPUT);
-
+  pinMode(EARTHLEDFLASHER, OUTPUT);
+  pinMode(ALARMSOUNDER, OUTPUT);
+  pinMode(LANELEDLEFT1, OUTPUT);
+  pinMode(LANELEDLEFT2, OUTPUT);
+  pinMode(LANELEDRIGHT1, OUTPUT);
+  pinMode(LANELEDRIGHT2, OUTPUT);
  Motor.attach(3);
 }
 
 void loop() {
+  //SET LEDS
+
+  digitalWrite(OPENLEDFLASHER, LOW);
+  digitalWrite(EARTHLEDFLASHER, LOW);
+  digitalWrite(LANELEDLEFT1, HIGH);
+  digitalWrite(LANELEDLEFT2,LOW);
+  digitalWrite(LANELEDRIGHT1, HIGH);
+  digitalWrite(LANELEDRIGHT2,LOW);
+  
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
-
+  
   // check if the pushbutton is pressed.
   // if it is, the buttonState is HIGH:
   if (buttonState == HIGH) {
     
     Serial.print(mode++);
+    flagio=false;
     Serial.print("\n");
     delay(1000);
   }
@@ -198,18 +218,25 @@ void loop() {
   mode=0;
   
 
-  if(mode==1)
+  if(mode==1&&flagio==false){
+    flagio=true;
     simulateEarthquake();
-  else if (mode==2)
+  }
+  else if (mode==2&&flagio==false){
+    flagio=true;
     simulateBridgeOpening();
-  else if (mode==3)
+}
+  else if (mode==3&&flagio==false){
+    flagio=true;
     laneChanging();
+    
+    }
     
 }
 
 void simulateEarthquake(){
   Serial.print("Earthquake simulating");
-  for(int j=0;j<2;j++){
+  for(int j=0;j<1;j++){
         for(int i = 0; i < 255; i = i + 2)
         {
             analogWrite(EARTHLEDFLASHER, i);
@@ -233,10 +260,13 @@ void simulateEarthquake(){
         }
         
   }
+  analogWrite(ALARMSOUNDER, 0);
 }
 
 void simulateBridgeOpening(){
-  for(int i=0;i<15;i++)
+  Serial.write("LEDS flashing\n");
+  
+  for(int i=0;i<10;i++)
   {
     digitalWrite(OPENLEDFLASHER,HIGH);
     delay(500);
@@ -246,10 +276,11 @@ void simulateBridgeOpening(){
   int flag=0;
   boolean play=false;
   while(flag==0){
-    int size = sizeof(melody) / sizeof(int);
+    //Serial.write("In loop\n");
     int ledState=LOW;
-  for (int thisNote = 0; thisNote < size; thisNote++){
-  unsigned long currentMillis = millis();
+  
+    Serial.write("IN HERE\n");
+    unsigned long currentMillis = millis();
 
   //if (currentMillis - previousMillis >= interval) {
     // save the last time you blinked the LED
@@ -266,10 +297,10 @@ void simulateBridgeOpening(){
     //digitalWrite(OPENLEDFLASHER, ledState);
 
     //MELODY
-
+    Serial.write("music should come soon");
     int size = sizeof(melody) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
-
+      Serial.write("In music loop");
       if (currentMillis - previousMillis >= interval) {
         previousMillis = currentMillis;
         if (ledState == LOW) {
@@ -281,7 +312,7 @@ void simulateBridgeOpening(){
     // set the LED with the ledState of the variable:
     digitalWrite(OPENLEDFLASHER, ledState);
       }
-      
+    
       // to calculate the note duration, take one second
       // divided by the note type.
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
@@ -301,6 +332,7 @@ void simulateBridgeOpening(){
         }
         
       }
+    
       // to distinguish the notes, set a minimum time between them.
       // the note's duration + 30% seems to work well:
       //int pauseBetweenNotes = noteDuration * 1.30;
@@ -309,29 +341,28 @@ void simulateBridgeOpening(){
       // stop the tone playing:
       //buzz(melodyPin, 0, noteDuration);
 
-      if(currentMillis-previousMillis3 >=15000 && currentMillis-previousMillis3<=18000){
-
+      if(currentMillis-previousMillis3 >=10000 && currentMillis-previousMillis3<=18000){
+        Serial.write("Motor should move");
         Motor.write(MF);
         
       }
 
-      if(currentMillis-previousMillis3>=18000&&currentMillis-previousMillis3<=19000){
+      else if(currentMillis-previousMillis3>=18000&&currentMillis-previousMillis3<=19000){
         Motor.write(MS);
         delay(5000);
       }
-      if(currentMillis-previousMillis3 >=24000 && currentMillis-previousMillis3<=26000){
+      else if(currentMillis-previousMillis3 >=24000 && currentMillis-previousMillis3<=26000){
 
         Motor.write(MB);
         
       }
-      if(currentMillis-previousMillis3>=26000&&currentMillis-previousMillis3<=27000){
+      else if(currentMillis-previousMillis3>=26000&&currentMillis-previousMillis3<=27000){
         Motor.write(MS);
         flag=1;
       }
+    }
+ 
   }
-  }
-  }  
-
 }
 
 void buzz(int targetPin, long frequency, long length) {
@@ -353,6 +384,33 @@ void buzz(int targetPin, long frequency, long length) {
 }
 
 void laneChanging(){
+  Serial.write("LANE CHANGING\n");
+  for(int i=0;i<10;i++){
   
+  digitalWrite(LANELEDLEFT1, HIGH);
+  digitalWrite(LANELEDLEFT2,LOW);
+  digitalWrite(LANELEDRIGHT1, HIGH);
+  digitalWrite(LANELEDRIGHT2,LOW);
+
+  delay(250);
+
+  digitalWrite(LANELEDLEFT1, LOW);
+  digitalWrite(LANELEDLEFT2,HIGH);
+  digitalWrite(LANELEDRIGHT1, LOW);
+  digitalWrite(LANELEDRIGHT2,HIGH);
+
+  delay(250);
+}
+  digitalWrite(LANELEDLEFT1, LOW);
+  digitalWrite(LANELEDLEFT2,HIGH);
+  digitalWrite(LANELEDRIGHT1, LOW);
+  digitalWrite(LANELEDRIGHT2,HIGH);
+
+  delay(10000);
+
+  digitalWrite(LANELEDLEFT1, HIGH);
+  digitalWrite(LANELEDLEFT2,LOW);
+  digitalWrite(LANELEDRIGHT1, HIGH);
+  digitalWrite(LANELEDRIGHT2,LOW);
 }
 
