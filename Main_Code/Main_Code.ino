@@ -145,7 +145,49 @@ int tempo[] = {
   12, 12, 12, 12,
   12, 12, 12, 12,
 };
-
+int underworld_melody[] = {
+  NOTE_C4, NOTE_C5, NOTE_A3, NOTE_A4,
+  NOTE_AS3, NOTE_AS4, 0,
+  0,
+  NOTE_C4, NOTE_C5, NOTE_A3, NOTE_A4,
+  NOTE_AS3, NOTE_AS4, 0,
+  0,
+  NOTE_F3, NOTE_F4, NOTE_D3, NOTE_D4,
+  NOTE_DS3, NOTE_DS4, 0,
+  0,
+  NOTE_F3, NOTE_F4, NOTE_D3, NOTE_D4,
+  NOTE_DS3, NOTE_DS4, 0,
+  0, NOTE_DS4, NOTE_CS4, NOTE_D4,
+  NOTE_CS4, NOTE_DS4,
+  NOTE_DS4, NOTE_GS3,
+  NOTE_G3, NOTE_CS4,
+  NOTE_C4, NOTE_FS4, NOTE_F4, NOTE_E3, NOTE_AS4, NOTE_A4,
+  NOTE_GS4, NOTE_DS4, NOTE_B3,
+  NOTE_AS3, NOTE_A3, NOTE_GS3,
+  0, 0, 0
+};
+//Underwolrd tempo
+int underworld_tempo[] = {
+  12, 12, 12, 12,
+  12, 12, 6,
+  3,
+  12, 12, 12, 12,
+  12, 12, 6,
+  3,
+  12, 12, 12, 12,
+  12, 12, 6,
+  3,
+  12, 12, 12, 12,
+  12, 12, 6,
+  6, 18, 18, 18,
+  6, 6,
+  6, 6,
+  6, 6,
+  18, 18, 18, 18, 18, 18,
+  10, 10, 10,
+  10, 10, 10,
+  3, 3, 3
+};
 
 
 // constants won't change. They're used here to
@@ -158,6 +200,8 @@ int tempo[] = {
 #define LANELEDLEFT2 11
 #define LANELEDRIGHT1 10
 #define LANELEDRIGHT2 8
+#define BLUELED 7
+#define melodyPin 5
 
 
 #include <Servo.h>
@@ -188,6 +232,7 @@ void setup() {
   pinMode(LANELEDLEFT2, OUTPUT);
   pinMode(LANELEDRIGHT1, OUTPUT);
   pinMode(LANELEDRIGHT2, OUTPUT);
+  pinMode(BLUELED, OUTPUT);
  Motor.attach(3);
 }
 
@@ -200,6 +245,7 @@ void loop() {
   digitalWrite(LANELEDLEFT2,LOW);
   digitalWrite(LANELEDRIGHT1, HIGH);
   digitalWrite(LANELEDRIGHT2,LOW);
+  
   
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
@@ -229,14 +275,17 @@ void loop() {
   else if (mode==3&&flagio==false){
     flagio=true;
     laneChanging();
-    
+    }
+    else if(mode==4&&flagio==false){
+      flagio=true;
+      blueLane();
     }
     
 }
 
 void simulateEarthquake(){
   Serial.print("Earthquake simulating");
-  for(int j=0;j<1;j++){
+  for(int j=0;j<2;j++){
         for(int i = 0; i < 255; i = i + 2)
         {
             analogWrite(EARTHLEDFLASHER, i);
@@ -266,7 +315,7 @@ void simulateEarthquake(){
 void simulateBridgeOpening(){
   Serial.write("LEDS flashing\n");
   
-  for(int i=0;i<10;i++)
+  for(int i=0;i<0;i++)
   {
     digitalWrite(OPENLEDFLASHER,HIGH);
     delay(500);
@@ -275,96 +324,82 @@ void simulateBridgeOpening(){
   }
   int flag=0;
   boolean play=false;
-  while(flag==0){
-    //Serial.write("In loop\n");
-    int ledState=LOW;
+  sing(1);
+
+  Serial.print("MOTOR MOVE \n");
+  Motor.write(MF); // move forward
+  analogWrite(ALARMSOUNDER, 200);
+  delay(1000);     
+  Serial.print("MOTOR STOP \n");
+  Motor.write(MS); // stop motor
+  analogWrite(ALARMSOUNDER, 0);
+  delay(1000);  
+
+Serial.print("MOTOR MOVE BACK \n");
+  Motor.write(MB); // move backward
+  analogWrite(ALARMSOUNDER, 100);
+  delay(1000);
+
+  Motor.write(MS); // stop motor
+  delay(1000);
+  analogWrite(ALARMSOUNDER, 0);
   
-    Serial.write("IN HERE\n");
-    unsigned long currentMillis = millis();
-
-  //if (currentMillis - previousMillis >= interval) {
-    // save the last time you blinked the LED
-    //previousMillis = currentMillis;
-
-    // if the LED is off turn it on and vice-versa:
-    //if (ledState == LOW) {
-      //ledState = HIGH;
-    //} else {
-      //ledState = LOW;
-    //}
-
-    // set the LED with the ledState of the variable:
-    //digitalWrite(OPENLEDFLASHER, ledState);
-
-    //MELODY
-    Serial.write("music should come soon");
+  
+}
+int song = 0;
+void sing(int s) {
+  // iterate over the notes of the melody:
+  song = s;
+  if (song == 2) {
+    Serial.println(" 'Underworld Theme'");
+    int size = sizeof(underworld_melody) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+ 
+      // to calculate the note duration, take one second
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000 / underworld_tempo[thisNote];
+      digitalWrite(OPENLEDFLASHER,HIGH);
+      buzz(melodyPin, underworld_melody[thisNote], noteDuration);
+ 
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+     
+   
+    
+    
+      // stop the tone playing:
+      buzz(melodyPin, 0, noteDuration);
+ digitalWrite(OPENLEDFLASHER,LOW);
+    }
+ 
+  } else {
+ 
+    Serial.println(" 'Mario Theme'");
     int size = sizeof(melody) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
-      Serial.write("In music loop");
-      if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
-        if (ledState == LOW) {
-      ledState = HIGH;
-    } else {
-      ledState = LOW;
-    }
-
-    // set the LED with the ledState of the variable:
-    digitalWrite(OPENLEDFLASHER, ledState);
-      }
-    
+ 
       // to calculate the note duration, take one second
       // divided by the note type.
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
       int noteDuration = 1000 / tempo[thisNote];
-    
-      
-      if (currentMillis - previousMillis2 >= noteDuration*1.30) {
-        previousMillis2 = currentMillis;
-
-        if(!play){
-          play=true;
-          buzz(melodyPin, melody[thisNote], noteDuration);
-        }
-        else if(play){
-          play=false;
-          buzz(melodyPin, 0, noteDuration);
-        }
-        
-      }
-    
+      digitalWrite(OPENLEDFLASHER,HIGH);
+      buzz(melodyPin, melody[thisNote], noteDuration);
+ 
       // to distinguish the notes, set a minimum time between them.
       // the note's duration + 30% seems to work well:
-      //int pauseBetweenNotes = noteDuration * 1.30;
-      //delay(pauseBetweenNotes);
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
  
       // stop the tone playing:
-      //buzz(melodyPin, 0, noteDuration);
-
-      if(currentMillis-previousMillis3 >=10000 && currentMillis-previousMillis3<=18000){
-        Serial.write("Motor should move");
-        Motor.write(MF);
-        
-      }
-
-      else if(currentMillis-previousMillis3>=18000&&currentMillis-previousMillis3<=19000){
-        Motor.write(MS);
-        delay(5000);
-      }
-      else if(currentMillis-previousMillis3 >=24000 && currentMillis-previousMillis3<=26000){
-
-        Motor.write(MB);
-        
-      }
-      else if(currentMillis-previousMillis3>=26000&&currentMillis-previousMillis3<=27000){
-        Motor.write(MS);
-        flag=1;
-      }
+      buzz(melodyPin, 0, noteDuration);
+    digitalWrite(OPENLEDFLASHER,LOW);
     }
- 
   }
 }
-
 void buzz(int targetPin, long frequency, long length) {
   digitalWrite(13, HIGH);
   long delayValue = 1000000 / frequency / 2; // calculate the delay value between transitions
@@ -412,5 +447,11 @@ void laneChanging(){
   digitalWrite(LANELEDLEFT2,LOW);
   digitalWrite(LANELEDRIGHT1, HIGH);
   digitalWrite(LANELEDRIGHT2,LOW);
+}
+
+void blueLane(){
+  digitalWrite(BLUELED,HIGH);
+  delay(10000);
+  digitalWrite(BLUELED,LOW);
 }
 
