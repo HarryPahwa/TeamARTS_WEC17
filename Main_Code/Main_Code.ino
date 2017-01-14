@@ -90,7 +90,7 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
  
-#define melodyPin 8
+//#define melodyPin 8
 //Mario main theme melody
 int melody[] = {
   NOTE_E7, NOTE_E7, 0, NOTE_E7,
@@ -243,8 +243,8 @@ void loop() {
   digitalWrite(EARTHLEDFLASHER, LOW);
   digitalWrite(LANELEDLEFT1, HIGH);
   digitalWrite(LANELEDLEFT2,LOW);
-  digitalWrite(LANELEDRIGHT1, HIGH);
-  digitalWrite(LANELEDRIGHT2,LOW);
+  digitalWrite(LANELEDRIGHT1, LOW);
+  digitalWrite(LANELEDRIGHT2,HIGH);
   
   
   // read the state of the pushbutton value:
@@ -315,7 +315,7 @@ void simulateEarthquake(){
 void simulateBridgeOpening(){
   Serial.write("LEDS flashing\n");
   
-  for(int i=0;i<0;i++)
+  for(int i=0;i<5;i++)
   {
     digitalWrite(OPENLEDFLASHER,HIGH);
     delay(500);
@@ -325,7 +325,7 @@ void simulateBridgeOpening(){
   int flag=0;
   boolean play=false;
   sing(1);
-
+  delay(2000);
   Serial.print("MOTOR MOVE \n");
   Motor.write(MF); // move forward
   analogWrite(ALARMSOUNDER, 200);
@@ -333,19 +333,19 @@ void simulateBridgeOpening(){
   Serial.print("MOTOR STOP \n");
   Motor.write(MS); // stop motor
   analogWrite(ALARMSOUNDER, 0);
-  delay(1000);  
+  delay(20000);  
 
 Serial.print("MOTOR MOVE BACK \n");
   Motor.write(MB); // move backward
   analogWrite(ALARMSOUNDER, 100);
   delay(1000);
-
+Serial.print("MOTOR MOVE BACK STOP \n");
   Motor.write(MS); // stop motor
   delay(1000);
   analogWrite(ALARMSOUNDER, 0);
   
-  
 }
+
 int song = 0;
 void sing(int s) {
   // iterate over the notes of the melody:
@@ -424,29 +424,29 @@ void laneChanging(){
   
   digitalWrite(LANELEDLEFT1, HIGH);
   digitalWrite(LANELEDLEFT2,LOW);
+  digitalWrite(LANELEDRIGHT1, LOW);
+  digitalWrite(LANELEDRIGHT2,HIGH);
+
+  delay(250);
+
+  digitalWrite(LANELEDLEFT1, LOW);
+  digitalWrite(LANELEDLEFT2,HIGH);
   digitalWrite(LANELEDRIGHT1, HIGH);
   digitalWrite(LANELEDRIGHT2,LOW);
 
   delay(250);
-
-  digitalWrite(LANELEDLEFT1, LOW);
-  digitalWrite(LANELEDLEFT2,HIGH);
-  digitalWrite(LANELEDRIGHT1, LOW);
-  digitalWrite(LANELEDRIGHT2,HIGH);
-
-  delay(250);
 }
-  digitalWrite(LANELEDLEFT1, LOW);
+  digitalWrite(LANELEDLEFT1, HIGH);
   digitalWrite(LANELEDLEFT2,HIGH);
   digitalWrite(LANELEDRIGHT1, LOW);
-  digitalWrite(LANELEDRIGHT2,HIGH);
+  digitalWrite(LANELEDRIGHT2,LOW);
 
   delay(10000);
 
   digitalWrite(LANELEDLEFT1, HIGH);
   digitalWrite(LANELEDLEFT2,LOW);
-  digitalWrite(LANELEDRIGHT1, HIGH);
-  digitalWrite(LANELEDRIGHT2,LOW);
+  digitalWrite(LANELEDRIGHT1, LOW);
+  digitalWrite(LANELEDRIGHT2,HIGH);
 }
 
 void blueLane(){
