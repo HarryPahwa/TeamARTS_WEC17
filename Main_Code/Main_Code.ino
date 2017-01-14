@@ -327,7 +327,7 @@ void simulateBridgeOpening(){
   sing(1);
   delay(2000);
   Serial.print("MOTOR MOVE \n");
-  Motor.write(MF); // move forward
+  Motor.write(MB); // move forward
   analogWrite(ALARMSOUNDER, 200);
   delay(1000);     
   Serial.print("MOTOR STOP \n");
@@ -336,7 +336,7 @@ void simulateBridgeOpening(){
   delay(20000);  
 
 Serial.print("MOTOR MOVE BACK \n");
-  Motor.write(MB); // move backward
+  Motor.write(MF); // move backward
   analogWrite(ALARMSOUNDER, 100);
   delay(1000);
 Serial.print("MOTOR MOVE BACK STOP \n");
