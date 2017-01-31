@@ -234,6 +234,7 @@ void setup() {
   pinMode(LANELEDRIGHT2, OUTPUT);
   pinMode(BLUELED, OUTPUT);
  Motor.attach(3);
+ Serial.print("NOW");
 }
 
 void loop() {
